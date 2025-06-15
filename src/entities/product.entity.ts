@@ -1,4 +1,9 @@
-import { Column, ManyToOne, PrimaryColumn, VersionColumn } from 'typeorm';
+import {
+  Column,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  VersionColumn,
+} from 'typeorm';
 import { PRODUCT_CONSTANTS } from '../constants';
 import { BaseEntity } from './base.entity';
 import { Category } from './category.entity';
@@ -11,7 +16,7 @@ export class Product extends BaseEntity {
     Object.assign(this, partial);
   }
 
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'varchar', unique: true, nullable: false })
@@ -27,7 +32,7 @@ export class Product extends BaseEntity {
   stock: number;
 
   @Column({ type: 'json', nullable: true })
-  imageUrls: string;
+  images: string[];
 
   @Column({ type: 'text', nullable: true })
   thumbnail: string;

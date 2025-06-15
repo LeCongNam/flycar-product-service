@@ -25,17 +25,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const {
       code,
-      message: initialMessage,
+      message: initialMessage = 'Internal Server Error',
       data = null,
     }: ResponseException = exception.getResponse() as ResponseException;
     this._logger.error('Unhandled exception', exception.getResponse());
 
     let message = initialMessage;
+
     if (typeof message === 'string') {
-      message =
-        this.i18n.t(`message.${message}`, {
-          lang: I18nContext.current()!.lang || 'en',
-        }) || message;
+      const key = `message.${message}`;
+      message = this.i18n.translate(key, {
+        lang: I18nContext.current()!.lang || 'en',
+        debug: true,
+      });
+
+      if (message === key) {
+        message = initialMessage; // Fallback to initial message if translation not found
+      }
     }
 
     response.status(status).json({
@@ -43,7 +49,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       code: code || 'unknown',
-      message,
+      message: message,
       data,
     });
   }

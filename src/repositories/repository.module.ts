@@ -1,7 +1,8 @@
 import { Global, Module } from '@nestjs/common';
+import { CategoryRepository } from './category.repository';
 import { ProductRepository } from './product.repository';
 
-const providers = [ProductRepository];
+const providers = [ProductRepository, CategoryRepository];
 
 @Global()
 @Module({

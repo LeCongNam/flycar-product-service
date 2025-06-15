@@ -32,13 +32,21 @@ export class BaseController {
       total = 0,
     } = {},
   ) {
+    const initialMessage = message;
+    try {
+      message = this.i18n.t(`message.$${message}`, {
+        lang: I18nContext.current()!.lang,
+      });
+    } catch (error) {
+      console.log(2);
+
+      message = initialMessage;
+    }
+
     return {
       data,
       total: total || null,
-      message:
-        this.i18n.t(`message.$${message}`, {
-          lang: I18nContext.current()!.lang,
-        }) || message,
+
       statusCode,
       extraData,
     };

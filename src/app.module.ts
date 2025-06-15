@@ -24,13 +24,14 @@ import { AppService } from './app.service';
 import { CoreModule } from './core/core.module';
 import { RedisModule } from './core/redis';
 import { RedisClientService } from './core/redis/redis.service';
+import { CategoryModule } from './domain/category/category.module';
 import { FileModule } from './domain/file/file.module';
+import { ProductModule } from './domain/product/product.module';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { RequestContextMiddleware } from './middlewares/request.middleware';
 import { ThrottlerBehindGuard } from './middlewares/throttler-behind.middleware';
 import { RepositoryModule } from './repositories/repository.module';
 import { HttpExceptionFilter } from './shared/http-exception.filter';
-import { ProductModule } from './domain/product/product.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -125,6 +126,7 @@ import { ProductModule } from './domain/product/product.module';
     FileModule,
     CoreModule,
     ProductModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [
