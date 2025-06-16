@@ -15,11 +15,16 @@ export function getRedisConnectionToken(connection?: string): string {
 }
 
 export function createRedisConnection(options: RedisModuleOptions) {
-  const { config } = options;
-  if (config.url) {
-    return new Redis(config.url, config);
-  } else {
-    return new Redis(config);
+  try {
+    const { config } = options;
+    if (config.url) {
+      return new Redis(config.url, config);
+    } else {
+      return new Redis(config);
+    }
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
   }
 }
 

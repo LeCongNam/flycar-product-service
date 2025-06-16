@@ -38,17 +38,18 @@ import { HttpExceptionFilter } from './shared/http-exception.filter';
     RedisModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        config: {
-          // url: configService.get('REDIS_URL'),
-          host: configService.get('REDIS_HOST'),
-          port: +configService.get('REDIS_PORT')!,
-          password: configService.get('REDIS_PASSWORD'),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+          config: {
+            url: configService.getOrThrow('REDIS_URL'),
+          },
+        };
+      },
     }),
     ThrottlerModule.forRootAsync({
-      useFactory: () => {
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
         return {
           throttlers: [
             {
@@ -68,43 +69,49 @@ import { HttpExceptionFilter } from './shared/http-exception.filter';
             },
           ],
           storage: new ThrottlerStorageRedisService(
-            new Redis({
-              host: process.env.REDIS_HOST,
-              port: +process.env.REDIS_PORT!,
-              password: process.env.REDIS_PASSWORD,
-            }),
+            new Redis(configService.getOrThrow('REDIS_URL')!),
           ),
         };
       },
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: (configSrv: ConfigService) => ({
-        type: 'mysql',
-        host: configSrv.get('MYSQL_HOST'),
-        port: +configSrv.get('MYSQL_PORT'),
-        username: configSrv.get('MYSQL_USERNAME'),
-        password: configSrv.get('MYSQL_PASSWORD'),
-        database: configSrv.get('MYSQL_DATABASE'),
-        synchronize: true,
-        autoLoadEntities: true,
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        // logging: ['query', 'error'],
-      }),
+      useFactory: (configSrv: ConfigService) => {
+        return {
+          type: 'mysql',
+          host: configSrv.get('MYSQL_HOST'),
+          port: +configSrv.get('MYSQL_PORT'),
+          username: configSrv.get('MYSQL_USERNAME'),
+          password: configSrv.get('MYSQL_PASSWORD'),
+          database: configSrv.get('MYSQL_DATABASE'),
+          synchronize: true,
+          autoLoadEntities: true,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          // logging: ['query', 'error'],
+          ...(configSrv.get('MYSQL_CA_CERT')
+            ? {
+                ssl: {
+                  ca: configSrv.get('MYSQL_CA_CERT'),
+                  rejectUnauthorized: true,
+                },
+              }
+            : {}),
+        };
+      },
       inject: [ConfigService],
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get('REDIS_HOST'),
-          port: +configService.get('REDIS_PORT')!,
-          password: configService.get('REDIS_PASSWORD'),
-        },
-        defaultJobOptions: {
-          attempts: 3,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        return {
+          connection: {
+            url: configService.getOrThrow('REDIS_URL'),
+          },
+          defaultJobOptions: {
+            attempts: 3,
+          },
+        };
+      },
     }),
     I18nModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
